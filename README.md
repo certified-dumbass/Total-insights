@@ -21,9 +21,9 @@ De DLL staat daarna in `bin/Release/net10.0/LibraryRuntime.dll`. Je kunt de bron
 
 | Doel | SDK | Buildargumenten |
 | --- | --- | --- |
-| Jellyfin 10.10.7 | .NET 8 | `-p:JellyfinVersion=10.10.7 -p:TargetFramework=net8.0` |
-| Jellyfin 10.11.x | .NET 9 | `-p:JellyfinVersion=10.11.0 -p:TargetFramework=net9.0` |
-| Jellyfin 12.0 | .NET 10 | `-p:JellyfinVersion=12.0.0 -p:TargetFramework=net10.0` |
+| Jellyfin 10.10.7 | .NET 8 | `-p:JellyfinVersion=10.10.7 -p:PluginTargetFramework=net8.0` |
+| Jellyfin 10.11.x | .NET 9 | `-p:JellyfinVersion=10.11.0 -p:PluginTargetFramework=net9.0` |
+| Jellyfin 12.0 | .NET 10 | `-p:JellyfinVersion=12.0.0 -p:PluginTargetFramework=net10.0` |
 | Jellyfin 12.4 | .NET 10 | Standaardinstelling |
 
 Gebruik de DLL die is gebouwd voor jouw serverreeks. Deze broncode is voorbereid op de targets hierboven. Controleer per target of de build slaagt en Jellyfin de plugin laadt.
