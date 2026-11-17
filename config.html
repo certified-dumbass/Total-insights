@@ -1,0 +1,139 @@
+<div id="libraryRuntime" data-role="page" class="page type-interior pluginConfigurationPage">
+    <div data-role="content">
+        <div class="content-primary">
+            <h2>Speelduur van je bibliotheek</h2>
+            <p>Totale duur van de beschikbare video’s op Dreamstreaming.</p>
+            <button id="lrRefresh" type="button" is="emby-button" class="raised emby-button">Speelduur berekenen</button>
+            <p id="lrStatus" role="status" aria-live="polite"></p>
+            <dl id="lrTotals"></dl>
+            <p id="lrCounts"></p>
+            <h3>Bibliotheken</h3>
+            <ol id="lrLibraries"></ol>
+            <h3>Series met de meeste speelduur</h3>
+            <ol id="lrSeries"></ol>
+            <h3>Discord-bericht</h3>
+            <div class="inputContainer">
+                <label for="lrWebhook">Discord-webhook</label>
+                <input id="lrWebhook" type="password" autocomplete="new-password" class="emby-input">
+                <p id="lrWebhookState"></p>
+                <label><input id="lrClearWebhook" type="checkbox"> Opgeslagen webhook verwijderen</label>
+            </div>
+            <div class="textareaContainer">
+                <label for="lrTemplate">Berichtsjabloon</label>
+                <textarea id="lrTemplate" rows="5" maxlength="2000" class="emby-textarea"></textarea>
+                <p><code>{hours} {days} {weeks} {months} {years} {items} {topLibrary} {topSeries}</code></p>
+            </div>
+            <button id="lrPreview" type="button" is="emby-button" class="raised emby-button">Voorbeeld</button>
+            <button id="lrSave" type="button" is="emby-button" class="raised emby-button">Instellingen opslaan</button>
+            <button id="lrSend" type="button" is="emby-button" class="raised emby-button">Opgeslagen bericht naar Discord sturen</button>
+            <p id="lrDiscordStatus" role="status" aria-live="polite"></p>
+            <pre id="lrMessage" style="white-space: pre-wrap; overflow-wrap: anywhere"></pre>
+        </div>
+    </div>
+    <script>
+        (function () {
+            const page = document.querySelector('#libraryRuntime');
+            const byId = id => page.querySelector('#lr' + id);
+            const number = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2 });
+
+            async function request(endpoint, data) {
+                const token = ApiClient.accessToken();
+                if (!token) throw new Error('Log in als beheerder.');
+                const response = await fetch(ApiClient.getUrl('Dreamstreaming/LibraryRuntime/' + endpoint), {
+                    method: data === undefined ? 'GET' : 'POST',
+                    headers: {
+                        Authorization: 'MediaBrowser Token="' + encodeURIComponent(token) + '"',
+                        'Content-Type': 'application/json'
+                    },
+                    body: data === undefined ? undefined : JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const body = await response.text();
+                    throw new Error(body && !body.startsWith('{') ? body : 'HTTP ' + response.status);
+                }
+                if (response.status !== 204) return response.json();
+            }
+
+            function value(object, name) {
+                return object[name] ?? object[name[0].toUpperCase() + name.slice(1)];
+            }
+
+            function renderRanking(id, rows) {
+                const list = byId(id);
+                list.replaceChildren();
+                for (const row of rows) {
+                    const entry = document.createElement('li');
+                    entry.textContent = value(row, 'name') + ' · ' + number.format(value(row, 'ticks') / 36e9) + ' uur';
+                    list.append(entry);
+                }
+                list.hidden = rows.length === 0;
+            }
+
+            async function refreshReport() {
+                const report = await request('Report');
+                const days = value(report, 'ticks') / 864e9;
+                const totals = byId('Totals');
+                totals.replaceChildren();
+                const units = [['Uren', days * 24], ['Dagen', days], ['Weken', days / 7],
+                    ['Maanden', days / (365.2425 / 12)], ['Jaren', days / 365.2425]];
+                for (const [unit, count] of units) {
+                    const label = document.createElement('dt');
+                    const amount = document.createElement('dd');
+                    label.textContent = unit;
+                    amount.textContent = number.format(count);
+                    totals.append(label, amount);
+                }
+
+                byId('Counts').textContent = number.format(value(report, 'itemCount')) + ' video’s, waarvan ' +
+                    number.format(value(report, 'missingRuntime')) + ' zonder bekende speelduur.';
+                renderRanking('Libraries', value(report, 'libraries'));
+                renderRanking('Series', value(report, 'series'));
+            }
+
+            async function refreshSettings() {
+                const settings = await request('Settings');
+                byId('Template').value = value(settings, 'template');
+                byId('WebhookState').textContent = value(settings, 'hasWebhook')
+                    ? 'Webhook opgeslagen. Laat het veld leeg om deze te behouden.'
+                    : 'Er is nog geen webhook ingesteld.';
+            }
+
+            async function run(button, status, action, message) {
+                if (button.disabled) return;
+                button.disabled = true;
+                status.textContent = 'Bezig…';
+                try {
+                    await action();
+                    status.textContent = message || '';
+                } catch (error) {
+                    status.textContent = error.message;
+                } finally {
+                    button.disabled = false;
+                }
+            }
+
+            const discord = byId('DiscordStatus');
+            byId('Refresh').onclick = () => run(byId('Refresh'), byId('Status'), refreshReport);
+            byId('Preview').onclick = () => run(byId('Preview'), discord, async () => {
+                const response = await request('Preview', { template: byId('Template').value });
+                byId('Message').textContent = value(response, 'message');
+            });
+            byId('Save').onclick = () => run(byId('Save'), discord, async () => {
+                await request('Settings', {
+                    template: byId('Template').value,
+                    webhook: byId('Webhook').value,
+                    clearWebhook: byId('ClearWebhook').checked
+                });
+                byId('Webhook').value = '';
+                byId('ClearWebhook').checked = false;
+                await refreshSettings();
+            }, 'Instellingen opgeslagen.');
+            byId('Send').onclick = () => run(byId('Send'), discord,
+                () => request('Send', {}), 'Rapport naar Discord gestuurd.');
+            page.addEventListener('viewshow', () => {
+                byId('Refresh').click();
+                run(byId('Save'), discord, refreshSettings);
+            });
+        }());
+    </script>
+</div>
