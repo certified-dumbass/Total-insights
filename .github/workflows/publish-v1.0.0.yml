@@ -1,0 +1,43 @@
+name: Publish Total Insights v1.0.0
+on:
+  push:
+    branches: [codex/publish-v1.0.0]
+    paths: [.github/workflows/publish-v1.0.0.yml]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a7671a1e06efc65a9fa71a5599502b9907278593
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Build and check all installation archives
+        run: |
+          set -euo pipefail
+          mkdir packages
+          build() {
+            local jellyfin="$1" framework="$2" version="$3"
+            dotnet build -c Release -p:JellyfinVersion="$jellyfin" -p:PluginTargetFramework="$framework" -p:AssemblyVersion="$version" -p:FileVersion="$version" -o "build-output/$jellyfin"
+            local archive="packages/TotalInsights-Jellyfin-$jellyfin.zip"
+            zip -j "$archive" "build-output/$jellyfin/LibraryRuntime.dll"
+            unzip -t "$archive"
+            md5sum "$archive"
+          }
+          build 10.10.7 net8.0 1.0.0.0
+          build 10.11.0 net9.0 1.0.0.1
+          build 12.0.0 net10.0 1.0.0.2
+          build 12.4.0 net10.0 1.0.0.3
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create v1.0.0 packages/*.zip \
+            --target a7671a1e06efc65a9fa71a5599502b9907278593 \
+            --title v1.0.0 \
+            --notes "Initial Total Insights release for Jellyfin. Install the package matching your server version, or add the plugin repository from the README."
