@@ -9,6 +9,20 @@ De beheerpagina telt de beschikbare, geïndexeerde films, afleveringen, overige 
 - Aanpasbaar Discord-rapport met een voorbeeld en handmatig verzenden.
 - Sjabloonvelden: `{hours}`, `{days}`, `{weeks}`, `{months}`, `{years}`, `{items}`, `{topLibrary}` en `{topSeries}`.
 
+## Installeren via de Jellyfin-catalogus
+
+1. Open **Dashboard → Plugins → Repositories** en voeg een repository toe met de naam **Total Insights**.
+2. Gebruik deze URL:
+
+   ```text
+   https://raw.githubusercontent.com/certified-dumbass/Total-insights/main/manifest.json
+   ```
+
+3. Open **Catalogus → Total Insights**, installeer de nieuwste versie die Jellyfin aanbiedt en start de server opnieuw.
+4. Open **Dashboard → Plugins → Total Insights** als beheerder.
+
+De [GitHub-release v1.0.0](https://github.com/certified-dumbass/Total-insights/releases/tag/v1.0.0) bevat vier aparte installatiepakketten. De catalogus gebruikt oplopende pluginversies van `1.0.0.0` tot `1.0.0.3`, zodat Jellyfin na een serverupgrade de juiste build kan aanbieden. Voor Jellyfin 12.4 is dat `1.0.0.3`.
+
 ## Bouwen
 
 Voor je Jellyfin 12.4-server heb je de .NET 10 SDK nodig. Voer in deze projectmap uit:
@@ -28,7 +42,7 @@ De DLL staat daarna in `bin/Release/net10.0/LibraryRuntime.dll`. Je kunt de bron
 
 Gebruik de DLL die is gebouwd voor jouw serverreeks. Deze broncode is voorbereid op de targets hierboven. Controleer per target of de build slaagt en Jellyfin de plugin laadt.
 
-## Installeren en gebruiken
+## Handmatig installeren vanaf een eigen build
 
 1. Stop Jellyfin.
 2. Maak `C:\ProgramData\Jellyfin\Server\plugins\LibraryRuntime_1.0.0.0` en plaats de gebouwde DLL rechtstreeks in die map.
