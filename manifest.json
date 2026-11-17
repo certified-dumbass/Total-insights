@@ -1,0 +1,44 @@
+[
+  {
+    "guid": "114f78ef-4940-495f-a7fb-7a47ab24592a",
+    "name": "Total Insights",
+    "description": "Shows total library runtime, library and series rankings, and configurable Discord reports for Jellyfin administrators.",
+    "overview": "See how much video is available on your Jellyfin server.",
+    "owner": "certified-dumbass",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.0.0.3",
+        "changelog": "Initial release for Jellyfin 12.4.0.",
+        "targetAbi": "12.4.0.0",
+        "sourceUrl": "https://github.com/certified-dumbass/Total-insights/releases/download/v1.0.0/TotalInsights-Jellyfin-12.4.0.zip",
+        "checksum": "46EA0A0AA6D60B43619F06B694F8C6CE",
+        "timestamp": "2026-11-17T11:50:12Z"
+      },
+      {
+        "version": "1.0.0.2",
+        "changelog": "Initial release for Jellyfin 12.0.0.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/certified-dumbass/Total-insights/releases/download/v1.0.0/TotalInsights-Jellyfin-12.0.0.zip",
+        "checksum": "B812B379924883977C4DD092D038ECE4",
+        "timestamp": "2026-11-17T11:50:12Z"
+      },
+      {
+        "version": "1.0.0.1",
+        "changelog": "Initial release for Jellyfin 10.11.0.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/certified-dumbass/Total-insights/releases/download/v1.0.0/TotalInsights-Jellyfin-10.11.0.zip",
+        "checksum": "6A20F50597E985D3DF75EE74E0AD5511",
+        "timestamp": "2026-11-17T11:50:12Z"
+      },
+      {
+        "version": "1.0.0.0",
+        "changelog": "Initial release for Jellyfin 10.10.7.",
+        "targetAbi": "10.10.7.0",
+        "sourceUrl": "https://github.com/certified-dumbass/Total-insights/releases/download/v1.0.0/TotalInsights-Jellyfin-10.10.7.zip",
+        "checksum": "9C6211DF03D94976CB7CF7C35D32CFFE",
+        "timestamp": "2026-11-17T11:50:12Z"
+      }
+    ]
+  }
+]
